@@ -1,0 +1,23 @@
+---
+- name: Fetch list of configuration files from remote server
+  shell: ls /home/nico/Work/python/ansible/test/configs/*.yml
+#  delegate_to: "{{ remote_server }}"
+  register: config_files
+
+- name: Ensure directory exists for the remote server's config files
+  file:
+    path: "/tmp/config_files/{{ remote_server }}"
+    state: directory
+    mode: '0755'
+
+- name: Fetch each configuration file to local machine
+  fetch:
+    src: "{{ config_file }}"
+    dest: "/tmp/config_files/{{ remote_server }}/"
+    flat: yes
+#  copy:
+#    src: "{{ config_file }}"
+#    dest: "/tmp/config_files/{{ remote_server }}/"
+  loop: "{{ config_files.stdout_lines }}"
+  loop_control:
+    loop_var: config_file

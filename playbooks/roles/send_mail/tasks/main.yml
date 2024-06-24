@@ -1,0 +1,6 @@
+---
+- name: Send mail notification
+  mail:
+    to: "{{ recipient }}"
+    subject: "Notification for module {{ module_name }}"
+    body: "Result: {{ result }}"

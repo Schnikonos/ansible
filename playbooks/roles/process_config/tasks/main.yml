@@ -1,0 +1,11 @@
+---
+- name: Load configuration file
+  include_vars:
+    file: "{{ config_file.path }}"
+    name: config
+
+- name: Iterate over apps
+  include_tasks: process_app.yml
+  loop: "{{ config['apps'] }}"
+  loop_control:
+    loop_var: app

@@ -1,0 +1,45 @@
+---
+- name: Initialize change flag
+  set_fact:
+    npa_change_ok: false
+
+- name: Change NPA passwords for each module
+  include_role:
+    name: change_npa_password
+  loop: "{{ module['npas'] }}"
+  loop_control:
+    loop_var: npa
+
+- name: Restart module if any NPA password was changed successfully
+  include_role:
+    name: restart_module
+  vars:
+    restart_command: "{{ module['start-script'] }}"
+  when: npa_change_ok
+  register: restart_result
+  ignore_errors: yes
+
+- name: Send mail notification based on restart result
+  include_role:
+    name: send_mail
+  vars:
+    recipient: "{{ module['mail'] }}"
+    module_name: "{{ module['name'] }}"
+    result: "{{ restart_result }}"
+  when: npa_change_ok
+
+- name: Handle errors and send failure notification
+  block:
+    - name: Check for any errors in the module handling
+      fail:
+        msg: "Error handling module {{ module.name }}"
+      when: npa_result.rc != 0 or restart_result.rc != 0
+
+    - name: Send mail notification for errors
+      include_role:
+        name: send_mail
+      vars:
+        recipient: "{{ module['mail'] }}"
+        module_name: "{{ module['name'] }}"
+        result: "An error occurred while handling the module. Please check the logs for details."
+  when: npa_result.rc != 0 or restart_result.rc != 0

@@ -1,0 +1,6 @@
+---
+- name: Iterate over modules in each app
+  include_tasks: process_module.yml
+  loop: "{{ app['modules'] }}"
+  loop_control:
+    loop_var: module

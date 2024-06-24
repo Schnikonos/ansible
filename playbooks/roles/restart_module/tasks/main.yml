@@ -1,0 +1,4 @@
+---
+- name: Restart module
+  command: "{{ restart_command }}"
+  register: restart_result
