@@ -1,12 +1,12 @@
 dbpwd: '/home/nico/Work/python/ansible/test/servers/dbpwd/txt'
-apps:
+app-list:
   - name: app1
-    modules:
+    module-list:
       - name: module1
-        start-script: 'sh /home/nico/Work/python/ansible/test/servers/module1/start.sh'
+        restart-command: 'sh /home/nico/Work/python/ansible/test/servers/module1/start.sh'
         profile: '/home/nico/Work/python/ansible/test/servers/module1/profile'
         mail: nicolas.jouvet@wanadoo.fr
-        npas:
+        npa-list:
           - name: NPA_1_1
             c0: C01111
             encoding: MD5
@@ -14,10 +14,10 @@ apps:
             c0: C011222
             encoding: MD5
       - name: module2
-        start-script: 'sh /home/nico/Work/python/ansible/test/servers/module2/start.sh'
+        restart-command: 'sh /home/nico/Work/python/ansible/test/servers/module2/start.sh'
         profile: '/home/nico/Work/python/ansible/test/servers/module2/profile'
         mail: nicolas.jouvet@wanadoo.fr
-        npas:
+        npa-list:
           - name: NPA_2_1
             c0: C0221111
             encoding: MD5

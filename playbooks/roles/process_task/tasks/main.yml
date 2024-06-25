@@ -1,0 +1,51 @@
+---
+- name: Initialize change flag
+  ansible.builtin.set_fact:
+    restart_result: false
+    npa_change_error: false
+
+- name: Get NPAs password for each task
+  ansible.builtin.include_role:
+    name: get_npa_password
+  loop: "{{ task['npa_list'] }}"
+  loop_control:
+    loop_var: npa
+
+- name: Update NPA file if needed
+  ansible.builtin.include_role:
+    name: update_npa_file
+
+- name: Restart module if any NPA password was changed successfully
+  ansible.builtin.include_role:
+    name: restart_module
+  vars:
+    restart_module_restart_command: "{{ task['restart_command'] }}"
+  when: task['restart_command']
+#  delegate_to: "{{ task['server'] }}"
+  register: restart_module_restart_result
+  ignore_errors: true
+
+- name: Send mail notification based on restart result
+  ansible.builtin.include_role:
+    name: send_mail
+  vars:
+    send_mail_recipient: "{{ task['mail'] }}"
+    send_mail_module_name: "{{ task['module'] }}"
+    send_mail_result: "{{ restart_module_restart_result }}"
+  when: restart_module_restart_result.rc == 0
+
+- name: Handle errors and send failure notification
+  when: npa_change_error or restart_module_restart_result.rc != 0
+  block:
+    - name: Check for any errors in the module handling
+      ansible.builtin.fail:
+        msg: "Error handling module {{ task['module'] }} - {{ npa_result }} - {{ restart_module_restart_result }}"
+      when: npa_change_error or restart_module_restart_result.rc != 0
+
+    - name: Send mail notification for errors
+      ansible.builtin.include_role:
+        name: send_mail
+      vars:
+        send_mail_recipient: "{{ task['mail'] }}"
+        send_mail_module_name: "{{ task['module'] }}"
+        send_mail_result: "An error occurred while handling the module. Please check the logs for details."

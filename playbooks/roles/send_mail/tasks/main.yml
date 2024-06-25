@@ -1,6 +1,10 @@
 ---
-- name: Send mail notification
-  mail:
-    to: "{{ recipient }}"
-    subject: "Notification for module {{ module_name }}"
-    body: "Result: {{ result }}"
+- name: Sending mail
+  ansible.builtin.debug:
+    msg: "Sending Mail: to=[{{ send_mail_recipient }}] - subject=[Notification for module {{ send_mail_module_name }}] - body=[Result: {{ send_mail_result }}]"
+
+# - name: Send mail notification
+#   mail:
+#    to: "{{ recipient }}"
+#    subject: "Notification for module {{ module_name }}"
+#    body: "Result: {{ result }}"

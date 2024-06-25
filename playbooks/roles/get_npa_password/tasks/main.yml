@@ -1,0 +1,16 @@
+---
+- name: Change NPA password
+  ansible.builtin.include_tasks: change_password.yml
+  vars:
+    npa_name: "{{ npa.name }}"
+  register: npa_result
+  ignore_errors: true
+
+- name: Set NPA change ok flag
+  ansible.builtin.set_fact:
+    npa_change_error: true
+  when: npa_result.rc != '0'
+
+- name: Log NPA password change result
+  ansible.builtin.debug:
+    msg: "Password change for NPA {{ npa.name }} in module {{ task }}: {{ npa_result }} - {{ npa_change_error }}"

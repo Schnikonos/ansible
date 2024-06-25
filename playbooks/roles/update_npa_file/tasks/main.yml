@@ -1,0 +1,13 @@
+---
+- name: Clean up old configuration files
+  ansible.builtin.file:
+    path: "/tmp/config_files"
+    state: absent
+
+- name: Fetch NPA file on machine
+  ansible.builtin.fetch:
+    fail_on_missing: false
+    src: "{{ task['profile'] }}"
+    dest: "/tmp/profile/"
+
+## TODO: read .profile and match it to NPAs + decode with passphrase from dbpwd + compare + if diff, backup .profile and change it with new passwords encoded

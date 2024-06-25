@@ -1,41 +1,26 @@
 ---
 - name: Process multiple configuration files
   hosts: localhost
-  gather_facts: no
+  gather_facts: false
   vars:
     remote_servers:
       - server1
       - server2
   tasks:
-    - name: Clean up old configuration files
-      file:
-        path: "/tmp/config_files"
-        state: absent
-
-    - name: Create directory for new configuration files
-      file:
-        path: "/tmp/config_files"
-        state: directory
-        mode: '0755'
-
     - name: Fetch configuration files from each remote server
-      include_role:
+      ansible.builtin.include_role:
         name: fetch_config
       loop: "{{ remote_servers }}"
       loop_control:
         loop_var: remote_server
 
-    - name: Find all config files stored in tmp folder
-      find:
-        paths: /tmp/config_files
-        recurse: yes
-        patterns: '*.yml'
-      register: local_files
+    - name: Load tasks generated from config files
+      ansible.builtin.include_vars:
+        file: /tmp/tasks.json
 
-    - name: Process each configuration file
-      include_role:
-        name: process_config
-      loop: "{{ local_files.files }}"
+    - name: Process each task
+      ansible.builtin.include_role:
+        name: process_task
+      loop: "{{ tasks }}"
       loop_control:
-        loop_var: config_file
-
+        loop_var: task

@@ -1,4 +1,5 @@
 ---
 - name: Restart module
-  command: "{{ restart_command }}"
-  register: restart_result
+  ansible.builtin.command: "{{ restart_module_restart_command }}"
+  register: restart_module_restart_result
+  changed_when: restart_module_restart_result.rc != 0

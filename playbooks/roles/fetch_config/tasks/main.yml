@@ -1,23 +1,37 @@
 ---
+- name: Clean up old configuration files
+  ansible.builtin.file:
+    path: "/tmp/config_files"
+    state: absent
+
+- name: Create directory for new configuration files
+  ansible.builtin.file:
+    path: "/tmp/config_files"
+    state: directory
+    mode: '0755'
+
 - name: Fetch list of configuration files from remote server
-  shell: ls /home/nico/Work/python/ansible/test/configs/*.yml
+  ansible.builtin.shell: ls ../test/configs/*.yml
 #  delegate_to: "{{ remote_server }}"
   register: config_files
+  changed_when: config_files.rc != 0
 
 - name: Ensure directory exists for the remote server's config files
-  file:
+  ansible.builtin.file:
     path: "/tmp/config_files/{{ remote_server }}"
     state: directory
     mode: '0755'
 
 - name: Fetch each configuration file to local machine
-  fetch:
+  ansible.builtin.fetch:
     src: "{{ config_file }}"
     dest: "/tmp/config_files/{{ remote_server }}/"
-    flat: yes
-#  copy:
-#    src: "{{ config_file }}"
-#    dest: "/tmp/config_files/{{ remote_server }}/"
+    flat: true
   loop: "{{ config_files.stdout_lines }}"
   loop_control:
     loop_var: config_file
+
+- name: Generate tasks from configuration files using Python script
+  ansible.builtin.command: python3 roles/fetch_config/files/generate_tasks.py
+  register: generate_result
+  changed_when: generate_result.rc != 0
